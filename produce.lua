@@ -359,4 +359,88 @@ do
     end
 end
 
+-- grid.integer_trigger. incriment & decriment an integer by triggering two keys
+do
+    local defaults = {
+        state = {1},
+        x = 1,                      --x position of the component
+        y = 1,                      --y position of the component
+        edge = 'rising',            --input edge sensitivity. 'rising' or 'falling'.
+        x_next = 1,                 --x position of a key that incriments value
+        y_next = 1,                 --y position of a key that incriments value
+        x_prev = nil,               --x position of a key that decriments value. nil for no dec
+        y_prev = nil,               --y position of a key that decriments value. nil for no dec
+        t = 0.1,                    --trigger time
+        levels = { 0, 15 },         --brightness levels. expects a table of 2 ints 0-15
+        wrap = true,                --wrap value around min/max
+        min = 1,                    --min value
+        max = 4,                    --max value
+        input = function(n, z) end, --input callback, passes last key state on any input
+    }
+    defaults.__index = defaults
+
+    function Produce.grid.integer_trigger()
+        local clk = {}
+        local blink = { 0, 0 }
+
+        return function(props)
+            if crops.device == 'grid' then 
+                setmetatable(props, defaults) 
+
+                if crops.mode == 'input' then 
+                    local x, y, z = table.unpack(crops.args) 
+                    local nxt = x == props.x_next and y == props.y_next
+                    local prev = x == props.x_prev and y == props.y_prev
+
+                    if nxt or prev then
+                        if
+                            (z == 1 and props.edge == 'rising')
+                            or (z == 0 and props.edge == 'falling')
+                        then
+                            local old = crops.get_state(props.state) or 0
+                            local v = old + (nxt and 1 or -1)
+
+                            if props.wrap then
+                                while v > props.max do v = v - (props.max - props.min + 1) end
+                                while v < props.min do v = v + (props.max - props.min + 1) end
+                            end
+         
+                            v = util.clamp(v, props.min, props.max)
+                            if old ~= v then
+                                crops.set_state(props.state, v)
+                            end
+                        end
+                        do
+                            local i = nxt and 2 or 1
+
+                            if clk[i] then clock.cancel(clk[i]) end
+
+                            blink[i] = 1
+
+                            clk[i] = clock.run(function()
+                                clock.sleep(props.t)
+                                blink[i] = 0
+                                crops.dirty.grid = true
+                            end)
+                            
+                            props.input(i, z)
+                        end
+                    end
+                elseif crops.mode == 'redraw' then 
+                    local g = crops.handler 
+
+                    for i = 1,2 do
+                        local x = i==2 and props.x_next or props.x_prev
+                        local y = i==2 and props.y_next or props.y_prev
+
+                        local lvl = props.levels[blink[i] + 1]
+
+                        if lvl>0 then g:led(x, y, lvl) end
+                    end
+                end
+            end
+        end
+    end
+end
+
 return Produce
