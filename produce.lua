@@ -18,13 +18,6 @@ do
         y = 1,                           --y position of the component
         pattern = pattern_time.new(),    --pattern_time instance
         varibright = true,
-        events = {
-            pre_clear = function() end,
-            post_stop = function() end,
-            pre_resume = function() end,
-            pre_rec_stop = function() end,
-            post_rec_start = function() end,
-        }
     }
     default_props.__index = default_props
 
@@ -58,9 +51,6 @@ do
         return function(props)
             if crops.device == 'grid' then
                 setmetatable(props, default_props)
-                if rawget(props, 'events') then
-                    setmetatable(props.events, default_props.events)
-                end
 
                 local pattern = props.pattern
 
@@ -76,7 +66,6 @@ do
                             
                             if theld > 0.5 then --hold to clear
                                 pattern:stop()
-                                props.events.pre_clear()
                                 pattern:clear()
                                 blinking = false
                             else
@@ -84,26 +73,21 @@ do
                                     if tlast < 0.3 then --double-tap to overdub
                                         pattern:resume()
                                         pattern:set_overdub(1)
-                                        props.events.post_rec_start()
                                         blinking = true
                                     else
                                         if pattern.rec == 1 then --play pattern / stop inital recording
-                                            props.events.pre_rec_stop()
                                             pattern:rec_stop()
                                             pattern:start()
                                             blinking = false
                                         elseif pattern.overdub == 1 then --stop overdub
-                                            props.events.pre_rec_stop()
                                             pattern:set_overdub(0)
                                             blinking = false
                                         else
                                             if pattern.play == 0 then --resume pattern
-                                                props.events.pre_resume()
                                                 pattern:resume()
                                                 blinking = false
                                             elseif pattern.play == 1 then --pause pattern
                                                 pattern:stop() 
-                                                props.events.post_stop()
                                                 blinking = false
                                             end
                                         end
@@ -111,7 +95,6 @@ do
                                 else
                                     if pattern.rec == 0 then --begin initial recording
                                         pattern:rec_start()
-                                        props.events.post_rec_start()
                                         blinking = true
                                     else
                                         pattern:rec_stop()
