@@ -1,4 +1,4 @@
-local Screen = {}
+local Produce = { screen = {} }
 
 -- text_highlight. screen.text, but boxed-out
 do
@@ -16,7 +16,7 @@ do
     }
     defaults.__index = defaults
 
-    function Screen.text_highlight()
+    function Produce.screen.text_highlight()
         return function(props)
             if crops.device == 'screen' then
                 setmetatable(props, defaults)
@@ -71,7 +71,7 @@ do
     }
     defaults.__index = defaults
 
-    function Screen.list_highlight()
+    function Produce.screen.list_highlight()
         return function (props)
             if crops.device == 'screen' then
                 setmetatable(props, defaults)
@@ -145,7 +145,7 @@ do
     }
     defaults.__index = defaults
 
-    function Screen.list_underline()
+    function Produce.screen.list_underline()
         return function(props)
             if crops.device == 'screen' then
                 setmetatable(props, defaults)
@@ -196,4 +196,4 @@ do
     end
 end
 
-return Screen
+return Produce.screen
