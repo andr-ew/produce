@@ -425,15 +425,10 @@ end
 
 --keymap_sequeggiator
 do
-    local default_args = {
-        action = function(idx) end,      --callback key trig
-        size = 128,                      --number of keys in component (same as momentaires.size)
-    }
-    default_args.__index = default_args
-
     local default_props = {
         x = 1,                           --x position of the component
         y = 1,                           --y position of the component
+        size = 128,                      --number of keys in component
         state = {{}}                     --state is a sequece of indices
         step = 1,                        --the current step in the sequence, this key is lit
         levels = { 0, 15 },              --brightness levels. expects a table of 2 ints 0-15
@@ -446,10 +441,7 @@ do
     }
     default_props.__index = default_props
 
-    function Produce.grid.keymap_sequeggiator(args)
-        args = args or {}
-        setmetatable(args, default_args)
-
+    function Produce.grid.keymap_sequeggiator()
         local NEW_SEQ, PLAYBACK = 1,2
 
         local mode = NEW_SEQ
