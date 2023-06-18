@@ -423,4 +423,60 @@ do
     end
 end
 
+--keymap_sequeggiator
+do
+    local default_args = {
+        action = function(idx) end,      --callback key trig
+        size = 128,                      --number of keys in component (same as momentaires.size)
+    }
+    default_args.__index = default_args
+
+    local default_props = {
+        x = 1,                           --x position of the component
+        y = 1,                           --y position of the component
+        state = {{}}                     --state is a sequece of indices
+        step = 1,                        --the current step in the sequence, this key is lit
+        levels = { 0, 15 },              --brightness levels. expects a table of 2 ints 0-15
+        input = function(n, z) end,      --input callback, passes last key state on any input
+        wrap = 16,                       --wrap to the next row/column every n keys
+        flow = 'right',                  --primary direction to flow: 'up', 'down', 'left', 'right'
+        flow_wrap = 'down',              --direction to flow when wrapping. must be perpendicular to flow
+        padding = 0,                     --add blank spaces before the first key
+                                         --note the lack of state prop – this is handled internally
+    }
+    default_props.__index = default_props
+
+    function Produce.grid.keymap_sequeggiator(args)
+        args = args or {}
+        setmetatable(args, default_args)
+
+        local NEW_SEQ, PLAYBACK = 1,2
+
+        local mode = NEW_SEQ
+
+        local function new_seq_press(idx)
+        end
+
+        local function new_seq_release(idx)
+        end
+
+        local function playback_tap(idx)
+        end
+
+        local function playback_double_tap(idx)
+        end
+
+        local function playback_hold(idx)
+        end
+        
+        return function(props)
+            setmetatable(props, default_props)
+
+            if crops.mode == 'input' then
+            elseif crops.mode == 'redraw' then
+            end
+        end
+    end
+end
+
 return Produce.grid
