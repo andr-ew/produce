@@ -429,7 +429,7 @@ do
         x = 1,                           --x position of the component
         y = 1,                           --y position of the component
         size = 128,                      --number of keys in component
-        state = {{}}                     --state is a sequece of indices
+        state = {{}},                    --state is a sequece of indices
         step = 1,                        --the current step in the sequence, this key is lit
         levels = { 0, 15 },              --brightness levels. expects a table of 2 ints 0-15
         input = function(n, z) end,      --input callback, passes last key state on any input
