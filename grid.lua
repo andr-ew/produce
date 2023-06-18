@@ -446,23 +446,23 @@ do
 
         local mode = NEW_SEQ
 
-        local function new_seq_press(idx)
-        end
-
-        local function new_seq_release(idx)
-        end
-
-        local function playback_tap(idx)
-        end
-
-        local function playback_double_tap(idx)
-        end
-
-        local function playback_hold(idx)
-        end
-        
         return function(props)
             setmetatable(props, default_props)
+
+            local function new_seq_press(idx)
+            end
+
+            local function new_seq_release(idx)
+            end
+
+            local function playback_tap(idx)
+            end
+
+            local function playback_double_tap(idx)
+            end
+
+            local function playback_hold(idx)
+            end
 
             if crops.mode == 'input' then
             elseif crops.mode == 'redraw' then
