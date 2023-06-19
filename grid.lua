@@ -223,4 +223,110 @@ do
     end
 end
 
+-- multitrigger. separate actions for short press, long press, and douple tap
+do
+    local defaults = {
+        x = 1,                          --x position of the component
+        y = 1,                          --y position of the component
+        levels = { 0, 15 },             --brightness levels. expects a table of 2 ints 0-15
+        action_tap = function() end,
+        action_double_tap = function() end,
+        action_hold = function() end,
+    }
+    defaults.__index = defaults
+
+    local holdtime = 0.5
+    local dtaptime = 0.25
+
+    function Produce.grid.multitrigger()
+        local blink_clk
+        local blink = 0
+        
+        local downtime = 0
+        local lasttime = 0
+        
+        local tap_clk
+
+        local function single_blink(time)
+            if blink_clk then clock.cancel(blink_clk) end
+
+            blink_clk = clock.run(function()
+                blink = 1
+                crops.dirty.grid = true
+
+                clock.sleep(time)
+                blink = 0
+                crops.dirty.grid = true
+            end)
+        end
+
+        local function double_blink()
+            if blink_clk then clock.cancel(blink_clk) end
+
+            blink_clk  = clock.run(function()
+                blink = 1
+                crops.dirty.grid = true
+
+                clock.sleep(0.2)
+                blink = 0
+                crops.dirty.grid = true
+
+                clock.sleep(0.1)
+                blink = 1
+                crops.dirty.grid = true
+
+                clock.sleep(0.2)
+                blink = 0
+                crops.dirty.grid = true
+            end)
+        end
+
+        return function(props)
+            if crops.device == 'grid' then
+                setmetatable(props, defaults)
+
+                if crops.mode == 'input' then
+                    local x, y, z = table.unpack(crops.args)
+
+                    if x == props.x and y == props.y then
+                        if z==1 then
+                            downtime = util.time()
+                        elseif z==0 then
+                            local theld = util.time() - downtime
+                            local tlast = util.time() - lasttime
+                                
+                            if tap_clk then clock.cancel(tap_clk) end
+
+                            if theld > holdtime then
+                                props.action_hold()
+                                single_blink(0.8)
+                            else
+                                if tlast < dtaptime then
+                                    props.action_double_tap()
+                                    double_blink()
+                                else
+                                    -- tap_clk = clock.run(function() 
+                                    --     clock.sleep(0.2)
+
+                                        props.action_tap()
+                                        single_blink(dtaptime)
+                                    -- end)
+                                end
+                            end
+
+                            lasttime = util.time()
+                        end
+                    end
+                elseif crops.mode == 'redraw' then
+                    local g = crops.handler
+
+                    local lvl = props.levels[blink + 1]
+
+                    if lvl>0 then g:led(props.x, props.y, lvl) end
+                end
+            end
+        end
+    end
+end
+
 return Produce.grid
