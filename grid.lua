@@ -164,8 +164,12 @@ do
                                             if pattern.play == 0 then --resume pattern
                                                 pattern:resume()
                                                 blinking = false
-                                            elseif pattern.play == 1 then --pause pattern
-                                                pattern:stop() 
+                                            elseif pattern.play == 1 then --pause/trig pattern
+                                                if pattern.loop == false then
+                                                    pattern:start()
+                                                else
+                                                    pattern:stop() 
+                                                end
                                                 blinking = false
                                             end
                                         end
