@@ -1,6 +1,6 @@
 local Produce = { grid = {} }
 
--- integer_trigger. incriment & decriment an integer by triggering two keys
+-- integer_trigger. incriment & decriment a value by triggering two keys
 do
     local defaults = {
         state = {1},
@@ -16,6 +16,7 @@ do
         wrap = true,                --wrap value around min/max
         min = 1,                    --min value
         max = 4,                    --max value
+        step = 1,                   --incriment/decriment amount
         input = function(n, z) end, --input callback, passes last key state on any input
     }
     defaults.__index = defaults
@@ -39,7 +40,7 @@ do
                             or (z == 0 and props.edge == 'falling')
                         then
                             local old = crops.get_state(props.state) or 0
-                            local v = old + (nxt and 1 or -1)
+                            local v = old + ((nxt and 1 or -1) * props.step)
 
                             if props.wrap then
                                 while v > props.max do v = v - (props.max - props.min + 1) end
