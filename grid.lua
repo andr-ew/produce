@@ -6,11 +6,13 @@ do
         state = {1},
         x = 1,                      --x position of the component
         y = 1,                      --y position of the component
+        size = 2,                   --this shouldn't be changed
+        flow = 'right',             --primary direction to flow: 'up', 'down', 'left', 'right'
         edge = 'rising',            --input edge sensitivity. 'rising' or 'falling'.
-        x_next = 1,                 --x position of a key that incriments value
-        y_next = 1,                 --y position of a key that incriments value
-        x_prev = nil,               --x position of a key that decriments value. nil for no dec
-        y_prev = nil,               --y position of a key that decriments value. nil for no dec
+        -- x_next = 1,                 --x position of a key that incriments value
+        -- y_next = 1,                 --y position of a key that incriments value
+        -- x_prev = nil,               --x position of a key that decriments value. nil for no dec
+        -- y_prev = nil,               --y position of a key that decriments value. nil for no dec
         t = 0.1,                    --trigger time
         levels = { 0, 15 },         --brightness levels. expects a table of 2 ints 0-15
         wrap = true,                --wrap value around min/max
@@ -31,16 +33,15 @@ do
 
                 if crops.mode == 'input' then 
                     local x, y, z = table.unpack(crops.args) 
-                    local nxt = x == props.x_next and y == props.y_next
-                    local prev = x == props.x_prev and y == props.y_prev
+                    local n = Grid.util.xy_to_index(props, x, y)
 
-                    if nxt or prev then
+                    if n then
                         if
                             (z == 1 and props.edge == 'rising')
                             or (z == 0 and props.edge == 'falling')
                         then
                             local old = crops.get_state(props.state) or 0
-                            local v = old + ((nxt and 1 or -1) * props.step)
+                            local v = old + ((n>1 and 1 or -1) * props.step)
 
                             if props.wrap then
                                 while v > props.max do v = v - (props.max - props.min + 1) end
@@ -53,27 +54,24 @@ do
                             end
                         end
                         do
-                            local i = nxt and 2 or 1
+                            if clk[n] then clock.cancel(clk[n]) end
 
-                            if clk[i] then clock.cancel(clk[i]) end
+                            blink[n] = 1
 
-                            blink[i] = 1
-
-                            clk[i] = clock.run(function()
+                            clk[n] = clock.run(function()
                                 clock.sleep(props.t)
-                                blink[i] = 0
+                                blink[n] = 0
                                 crops.dirty.grid = true
                             end)
                             
-                            props.input(i, z)
+                            props.input(n, z)
                         end
                     end
                 elseif crops.mode == 'redraw' then 
                     local g = crops.handler 
 
                     for i = 1,2 do
-                        local x = i==2 and props.x_next or props.x_prev
-                        local y = i==2 and props.y_next or props.y_prev
+                        local x, y = Grid.util.index_to_xy(props, i)
 
                         local lvl = props.levels[blink[i] + 1]
 
