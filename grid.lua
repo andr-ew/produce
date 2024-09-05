@@ -93,7 +93,7 @@ do
     local default_props = {
         x = 1,                           --x position of the component
         y = 1,                           --y position of the component
-        pattern = pattern_time.new(),    --pattern_time instance
+        pattern = {},                    --pattern_time instance
         varibright = true,
     }
     default_props.__index = default_props
