@@ -52,20 +52,22 @@ do
                             if old ~= v then
                                 crops.set_state(props.state, v)
                             end
-                        end
-                        do
-                            if clk[n] then clock.cancel(clk[n]) end
 
-                            blink[n] = 1
+                            do
+                                if clk[n] then clock.cancel(clk[n]) end
 
-                            clk[n] = clock.run(function()
-                                clock.sleep(props.t)
-                                blink[n] = 0
+                                blink[n] = 1
                                 crops.dirty.grid = true
-                            end)
-                            
-                            props.input(n, z)
+
+                                clk[n] = clock.run(function()
+                                    clock.sleep(props.t)
+                                    blink[n] = 0
+                                    crops.dirty.grid = true
+                                end)
+                                
+                            end
                         end
+                        props.input(n, z)
                     end
                 elseif crops.mode == 'redraw' then 
                     local g = crops.handler 
